@@ -164,11 +164,18 @@ async function processImagesInParsedFiles(parsedFiles, namingInfo, tools) {
     }
     
     try {
+      // 为每个文件构建特定的命名信息
+      const fileSpecificNamingInfo = {
+        ...namingInfo,
+        sourceFileName: file.fileName,
+        sourceFolderName: getSourceFolderName(file.filePath)
+      };
+      
       // 处理图片
       const imageResult = await imageManager.processImagesInFile(
         file.filePath,
         file.content,
-        namingInfo
+        fileSpecificNamingInfo
       );
       
       // 更新文件内容
@@ -228,11 +235,24 @@ function generateImageProcessingSummary(parsedFiles) {
   };
 }
 
+/**
+ * 获取源文件所在文件夹的名称
+ * @param {string} filePath - 文件路径
+ * @returns {string} 文件夹名称
+ */
+function getSourceFolderName(filePath) {
+  const path = require('path');
+  const dirName = path.dirname(filePath);
+  const folderName = path.basename(dirName);
+  return folderName || '未分类';
+}
+
 module.exports = {
   parseFilesEnhanced,
   extractHeadings,
   extractCodeBlocks,
   extractMetadata,
   processImagesInParsedFiles,
-  generateImageProcessingSummary
+  generateImageProcessingSummary,
+  getSourceFolderName
 };

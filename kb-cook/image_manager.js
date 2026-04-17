@@ -123,19 +123,26 @@ function parseImagePath(imageUrl, sourceDir) {
  * @returns {string} 新文件名
  */
 function generateNewImageName(namingInfo, originalExtension, index) {
-  const { category, theme, knowledge } = namingInfo;
+  const { category, theme, knowledge, sourceFileName } = namingInfo;
+  
+  // 优先使用源文件名作为图片命名的基础
+  let baseName = '未命名';
+  
+  if (sourceFileName) {
+    // 移除文件扩展名
+    baseName = path.basename(sourceFileName, path.extname(sourceFileName));
+  } else if (knowledge && knowledge !== '未命名知识点') {
+    baseName = knowledge;
+  } else if (theme && theme !== '未命名主题') {
+    baseName = theme;
+  }
   
   // 清理名称中的非法字符
-  const cleanCategory = sanitizeForFilename(category || '未分类');
-  const cleanTheme = sanitizeForFilename(theme || '未命名主题');
-  const cleanKnowledge = sanitizeForFilename(knowledge || '未命名知识点');
+  const cleanBaseName = sanitizeForFilename(baseName);
+  const cleanKnowledge = sanitizeForFilename(knowledge || '知识点');
   
-  // 生成新文件名
-  const newName = imageManagerConfig.namingPattern
-    .replace('{category}', cleanCategory)
-    .replace('{theme}', cleanTheme)
-    .replace('{knowledge}', cleanKnowledge)
-    .replace('{index}', index.toString().padStart(3, '0'));
+  // 生成新文件名：源文件名-知识点-编号
+  const newName = `${cleanBaseName}-${cleanKnowledge}-${index.toString().padStart(3, '0')}`;
   
   return newName + originalExtension;
 }
@@ -189,11 +196,21 @@ async function copyImageToNewLocation(imageRef, namingInfo, index) {
     // 生成新文件名
     const newFilename = generateNewImageName(namingInfo, imageRef.extension, index);
     
-    // 创建目标目录结构
+    // 创建目标目录结构 - 使用源文件所在文件夹的名称
+    let folderName = '未分类';
+    
+    if (namingInfo.sourceFolderName) {
+      folderName = namingInfo.sourceFolderName;
+    } else if (namingInfo.theme && namingInfo.theme !== '未命名主题') {
+      folderName = namingInfo.theme;
+    }
+    
+    // 清理文件夹名称
+    const cleanFolderName = sanitizeForFilename(folderName);
+    
     const targetDir = path.join(
       imageManagerConfig.imageBaseDir,
-      namingInfo.category || '未分类',
-      namingInfo.theme || '未命名主题'
+      cleanFolderName
     );
     
     await fs.mkdir(targetDir, { recursive: true });
@@ -204,11 +221,26 @@ async function copyImageToNewLocation(imageRef, namingInfo, index) {
     // 复制图片文件
     await fs.copyFile(imageRef.absolutePath, targetPath);
     
-    // 生成相对路径（相对于输出目录）
-    const relativePath = path.relative(
-      namingInfo.outputDir || process.cwd(),
-      targetPath
-    );
+    // 生成相对路径 - 相对于输出目录中的Markdown文件位置
+    // 图片保存在 /home/zilo/kb/imgs/文件夹名/
+    // Markdown文件保存在输出目录中，所以需要计算相对路径
+    let relativePath;
+    
+    if (namingInfo.outputDir) {
+      // 计算从输出目录到图片的相对路径
+      relativePath = path.relative(namingInfo.outputDir, targetPath);
+      
+      // 确保路径使用正斜杠（Markdown标准）
+      relativePath = relativePath.replace(/\\/g, '/');
+      
+      // 如果路径不在同一目录下，添加 ../
+      if (!relativePath.startsWith('.')) {
+        relativePath = './' + relativePath;
+      }
+    } else {
+      // 如果没有输出目录，使用绝对路径
+      relativePath = targetPath;
+    }
     
     result.success = true;
     result.newPath = targetPath;
@@ -275,19 +307,55 @@ function updateImagePathsInContent(content, imageUpdates) {
           console.warn(`    URL不匹配: 当前URL=${currentUrl}, 原始URL=${originalUrl}`);
         }
       } else {
-        // 方法2：如果正则匹配失败，使用字符串替换（回退方案）
-        console.warn(`    无法解析Markdown图片语法，使用字符串替换: ${originalLine}`);
+        // 方法2：检查是否为 [Pasted ~X lines] 格式的图片引用
+        // 这种格式常见于某些笔记软件粘贴的图片
+        const pastedImageRegex = /^(\s*)(\[Pasted\s+~\d+\s+lines\])(\s*)$/;
+        const pastedMatch = originalLine.match(pastedImageRegex);
         
-        // 转义特殊字符用于正则表达式
-        const escapedUrl = originalUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const urlRegex = new RegExp(escapedUrl, 'g');
-        
-        if (urlRegex.test(originalLine)) {
-          const updatedLine = originalLine.replace(urlRegex, newUrl);
-          lines[lineIndex] = updatedLine;
-          console.log(`    字符串替换成功: ${updatedLine}`);
+        if (pastedMatch) {
+          console.log(`    检测到 [Pasted ~X lines] 格式的图片引用: ${originalLine}`);
+          
+          // 替换为标准的Markdown图片语法
+          const altText = `图片 ${update.imageRef.filename || 'image'}`;
+          const newImageSyntax = `${pastedMatch[1]}![${altText}](${newUrl})${pastedMatch[3]}`;
+          
+          // 替换整行
+          lines[lineIndex] = newImageSyntax;
+          
+          console.log(`    成功替换 [Pasted] 格式: ${originalLine} -> ${newImageSyntax}`);
         } else {
-          console.error(`    无法找到URL进行替换: ${originalUrl}`);
+          // 检查是否为包含 [Pasted ~X lines] 的行（非整行匹配）
+          const containsPastedRegex = /(\[Pasted\s+~\d+\s+lines\])/;
+          const containsPastedMatch = originalLine.match(containsPastedRegex);
+          
+          if (containsPastedMatch) {
+            console.log(`    检测到包含 [Pasted ~X lines] 的行: ${originalLine}`);
+            
+            // 替换为标准的Markdown图片语法
+            const altText = `图片 ${update.imageRef.filename || 'image'}`;
+            const newImageSyntax = `![${altText}](${newUrl})`;
+            
+            // 只替换 [Pasted ~X lines] 部分
+            const updatedLine = originalLine.replace(containsPastedRegex, newImageSyntax);
+            lines[lineIndex] = updatedLine;
+            
+            console.log(`    成功替换包含的 [Pasted] 格式: ${originalLine} -> ${updatedLine}`);
+          } else {
+            // 方法3：如果正则匹配失败，使用字符串替换（回退方案）
+            console.warn(`    无法解析Markdown图片语法，使用字符串替换: ${originalLine}`);
+            
+            // 转义特殊字符用于正则表达式
+            const escapedUrl = originalUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const urlRegex = new RegExp(escapedUrl, 'g');
+            
+            if (urlRegex.test(originalLine)) {
+              const updatedLine = originalLine.replace(urlRegex, newUrl);
+              lines[lineIndex] = updatedLine;
+              console.log(`    字符串替换成功: ${updatedLine}`);
+            } else {
+              console.error(`    无法找到URL进行替换: ${originalUrl}`);
+            }
+          }
         }
       }
     }

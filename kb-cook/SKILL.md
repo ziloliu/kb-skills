@@ -20,7 +20,7 @@ metadata:
 - **文件生成**：为每个主题生成独立的、结构化的.md文件
 - **图片处理**：自动识别、重命名和保存Markdown中的图片，保持图片在文档中的位置
 
-**特别优化**：基于 `/home/zilo/kb/cooking/stm32/STM32开发环境搭建.md` 示例文件的结构和用户习惯进行优化，生成更符合实际使用需求的笔记。
+**特别优化**：基于 `/home/zilo/kb/cooking/stm32/STM32开发环境搭建.md` 和 `/home/zilo/kb/cooking/stm32/STM32中断系统.md` 示例文件的结构和用户习惯进行优化，生成更符合实际使用需求的笔记。
 
 **新增图片处理功能**：
 1. 自动识别Markdown文件中的图片引用
@@ -175,7 +175,8 @@ for (const theme of organizedContent.themes) {
 - 图片保存目录：`/home/zilo/kb/imgs`
 - 目录结构：`{分类}/{主题}/`
 - 命名模式：`{分类}-{主题}-{知识点}-{编号}.{扩展名}`
-- 示例：`technology-STM32开发环境-ARM工具链-001.png`
+- 示例1：`STM32-STM32开发环境-ARM工具链-001.png`
+- 示例2：`STM32-STM32中断系统-图片-001.png`
 
 #### 3. 路径更新
 - 自动更新Markdown文件中的图片路径
@@ -213,20 +214,24 @@ organized-knowledge/
 ### 图片输出结构
 ```
 /home/zilo/kb/imgs/
-├── technology/
+├── STM32/
 │   ├── STM32开发环境/
-│   │   ├── technology-STM32开发环境-ARM工具链-001.png
-│   │   ├── technology-STM32开发环境-ST-Link配置-002.jpg
-│   │   └── technology-STM32开发环境-VSCode配置-003.png
-│   └── ARM工具链/
-│       └── technology-ARM工具链-交叉编译-001.png
+│   │   ├── STM32-STM32开发环境-ARM工具链-001.png
+│   │   ├── STM32-STM32开发环境-ST-Link配置-002.jpg
+│   │   └── STM32-STM32开发环境-VSCode配置-003.png
+│   └── STM32中断系统/
+│       ├── STM32-STM32中断系统-图片-001.png
+│       ├── STM32-STM32中断系统-图片-002.png
+│       ├── STM32-STM32中断系统-图片-003.png
+│       ├── ...
+│       └── STM32-STM32中断系统-图片-027.png
 └── programming/
     └── Python基础/
         ├── programming-Python基础-数据类型-001.png
         └── programming-Python基础-控制流-002.png
 ```
 
-### 输出文件示例（包含图片信息）
+### 输出文件示例1：STM32开发环境搭建（基础模板）
 
 ```markdown
 # STM32开发环境搭建
@@ -259,7 +264,7 @@ organized-knowledge/
 1. STM32F103ZET6开发板
 2. ST-Link V2/V3调试器
 
-![STM32开发板](technology-STM32开发环境-硬件要求-001.jpg "STM32F103开发板")
+![STM32开发板](../../imgs/STM32/STM32开发环境/STM32-STM32开发环境-硬件要求-001.jpg "STM32F103开发板")
 
 ### 软件要求
 
@@ -280,7 +285,7 @@ sudo apt install gcc-arm-none-eabi
 
 **工具链架构**:
 
-![ARM工具链架构](technology-STM32开发环境-ARM工具链-002.png "ARM工具链组件")
+![ARM工具链架构](../../imgs/STM32/STM32开发环境/STM32-STM32开发环境-ARM工具链-002.png "ARM工具链组件")
 
 ---
 
@@ -302,9 +307,191 @@ sudo apt install gcc-arm-none-eabi
 - **章节数**: 12
 - **图片总数**: 5
 - **已处理图片**: 5
-- **图片保存位置**: /home/zilo/kb/imgs/technology/STM32开发环境/
+- **图片保存位置**: /home/zilo/kb/imgs/STM32/STM32开发环境/
 - **分类**: 嵌入式开发与技术工具
 - **主题**: STM32开发环境搭建
+```
+
+### 输出文件示例2：STM32中断系统（技术教程模板，包含代码案例）
+
+```markdown
+## 概述
+
+该文档介绍了stm32的中断系统的相关知识，包括以下知识点:
+* 中断类型
+* 中断体系架构
+* 中断优先级
+* 寄存器下的中断案例
+* HAL库下的中断案例
+
+## 中断系统介绍
+
+- Cortex-M3处理器
+
+    - 支持256个中断（16个内核 + 240个外部）
+
+    - 256级可编程中断优先级
+
+- STM32系列
+
+    - 总计84个中断（16个内核 + 68个可屏蔽）
+
+    - 16级可编程中断优先级
+
+- STM32F103
+
+    - 总计70个中断（10个内核 + 60个外部）
+
+下面的列表中，灰色背景的是内部中断（或者异常），其他的为外部中断。
+
+![](../../imgs/STM32/STM32中断系统/STM32-STM32中断系统-图片-001.png)
+
+![](../../imgs/STM32/STM32中断系统/STM32-STM32中断系统-图片-002.png)
+
+- 优先级越小，优先级越高
+
+- 地址是中断处理程序的入口地址
+
+## 中断体系结构
+
+- 三种中断来源（优先级由高到低）
+
+    - 内核以及其他控件（系统嘀嗒计时器/复位etc）
+
+    - 片上外设（串口/定时器/各种通信模块etc）
+
+    - 外部中断（来自芯片外，通过复用输入输出引脚）
+
+- 嵌套向量中断控制器管理着包括内核异常，外部中断等所有中断。由NVIC决定哪个中断的处理程序交给CPU来执行
+
+- AFIO引脚复用选择控制器
+
+    - 用于选择GPIOx传递来的外部中断
+
+    - 输入16*7，输出16（GPIOx某一对应的全部引脚为一个信号）
+
+- EXIT（20个输入）
+
+    - 用于选择外部中断
+
+    - 16个引脚
+
+        - 用于选择外部中断输入引脚
+
+    - 4个引脚
+
+        - PVD电源检测
+
+        - RTC闹钟
+
+        - USB检测
+
+        - 以太网唤醒
+
+![](../../imgs/STM32/STM32中断系统/STM32-STM32中断系统-图片-005.png)
+
+# 中断案例
+
+- 利用外部中断检测按键KEY3，当按键按下，翻转LED1显示。
+
+![](../../imgs/STM32/STM32中断系统/STM32-STM32中断系统-图片-014.png)
+
+### 寄存器实现
+
+#### 寄存器配置
+
+- 时钟初始化
+
+    - 开启GPIOF时钟
+
+    - 开启AFIO时钟
+
+```c
+/* 1 开启时钟 (EXTI和NVIC时钟始终开启，无需手动开启)*/
+  /* 1.1 开启 GPIOF 时钟 */
+  RCC->APB2ENR |= RCC_APB2ENR_IOPFEN;
+  /* 1.2 开启AFIO时钟 */
+  RCC->APB2ENR |= RCC_APB2ENR_AFIOEN;
+```
+
+- GPIO模式配置
+
+    - 按键GPIO模式配置（下拉输入）
+
+```c
+  /* 2 配置GPIO  设置为输入 下拉(cnf: 10 mode: 00) 。另外还需要把ODR寄存器对应的位设为0  (1=上拉)*/
+    GPIOF->CRH &= ~GPIO_CRH_MODE10;
+    GPIOF->CRH |= GPIO_CRH_CNF10_1;
+    GPIOF->CRH &= ~GPIO_CRH_CNF10_0;
+    GPIOF->ODR &= ~GPIO_ODR_ODR10;
+```
+
+### HAL库实现
+
+- 图形化编辑
+
+    - GPIO
+
+![](../../imgs/STM32/STM32中断系统/STM32-STM32中断系统-图片-027.png)
+
+- 中断处理流程：
+
+    - 按键按下触发上升沿，执行EXTI15_10_IRQHandler
+
+        - 调用HAL_GPIO_EXTI_IRQHandler处理中断
+
+        - 调用HAL_GPIO_EXTI_Callback回调函数（**__weak**弱实现）
+
+        - 自定义实现HAL_GPIO_EXTI_Callback即可
+
+```c
+ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+ {
+    /*2.防抖处理，延时10ms*/
+    HAL_Delay(10);
+
+    /*3.根据GPIOF10的状态，判断是否有按键按下*/
+    if(HAL_GPIO_ReadPin(GPIOF,GPIO_PIN_10) == GPIO_PIN_SET)
+    {
+        LED_Toggle(LED1);
+    }
+ }
+```
+
+# 案例拓展
+
+## 1.按键开关流水灯
+
+### 概要设计
+
+- 基于开关灯与流水灯的逻辑
+
+- 设计流水灯开启标志位
+
+- 在中断中只对标志位进行处理
+
+### 详细设计
+
+```c
+/*定义一个全局变量，表示是否开启流水灯的标志位*/
+uint8_t key_value = 0;
+
+/* EXTI15_10中断服务函数 */
+void EXTI15_10_IRQHandler(void)
+{
+    /*1.清除EXTI15_10中断标志*/
+    EXTI->PR |= EXTI_PR_PR10;
+
+    /*2.防抖处理，延时10ms*/
+    Com_Delay_ms(10);
+
+    /*3.根据GPIOF10的状态，判断是否有按键按下*/
+    if((GPIOF->IDR & GPIO_IDR_IDR10) != 0)
+    {
+     key_value = ~key_value;
+    }
+}
+```
 ```
 
 ## 错误处理
@@ -365,3 +552,6 @@ await organizeKnowledgeBaseWithImages(stm32Config);
 2. 基于示例文件优化的模板更适合技术文档和教程类内容的整理
 3. 图片处理功能会修改原始文件中的图片路径，建议先备份重要文件
 4. 如果笔记中包含网络图片，这些图片不会被下载和处理，但会在报告中标记
+5. 图片路径使用相对路径（如 `../../imgs/STM32/STM32中断系统/`），确保文档在不同位置都能正确显示
+6. 对于技术教程类文档（如STM32中断系统），模板会保留完整的代码块、详细的案例和拓展内容
+7. 分类目录建议使用主题相关的名称（如 `STM32`、`Python`、`Linux` 等），而不是通用的 `technology`
