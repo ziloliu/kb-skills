@@ -1,0 +1,38 @@
+{
+  "skill_name": "md-docs-refactor",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "我有个项目文档文件夹在 /tmp/opencode-skills/md-docs-refactor-workspace/test-docs/，里面有4个.md文件，内容比较杂乱。请帮我重构这些文档，按主题重新组织内容，输出到新的refactored-docs目录。",
+      "expected_output": "按主题重新组织的多个.md文件，主题结构清晰，内容完整保留",
+      "files": [
+        "/tmp/opencode-skills/md-docs-refactor-workspace/test-docs/api-intro.md",
+        "/tmp/opencode-skills/md-docs-refactor-workspace/test-docs/installation.md",
+        "/tmp/opencode-skills/md-docs-refactor-workspace/test-docs/usage.md",
+        "/tmp/opencode-skills/md-docs-refactor-workspace/test-docs/troubleshooting.md"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "整理一下我的技术文档，在 /tmp/opencode-skills/md-docs-refactor-workspace/test-docs/ 这个文件夹里有几个markdown文件，需要按主题重新组织一下，改善文档结构。",
+      "expected_output": "重构后的文档，主题分类合理，内容保持原意",
+      "files": [
+        "/tmp/opencode-skills/md-docs-refactor-workspace/test-docs/api-intro.md",
+        "/tmp/opencode-skills/md-docs-refactor-workspace/test-docs/installation.md",
+        "/tmp/opencode-skills/md-docs-refactor-workspace/test-docs/usage.md",
+        "/tmp/opencode-skills/md-docs-refactor-workspace/test-docs/troubleshooting.md"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "我需要合并和重构几个API文档，它们在 /tmp/opencode-skills/md-docs-refactor-workspace/test-docs/ 目录下。请分析这些文档，提取主题，然后按主题重新组织内容，保持原文但改善结构。",
+      "expected_output": "合并重构后的API文档，主题层次清晰，内容完整",
+      "files": [
+        "/tmp/opencode-skills/md-docs-refactor-workspace/test-docs/api-intro.md",
+        "/tmp/opencode-skills/md-docs-refactor-workspace/test-docs/installation.md",
+        "/tmp/opencode-skills/md-docs-refactor-workspace/test-docs/usage.md",
+        "/tmp/opencode-skills/md-docs-refactor-workspace/test-docs/troubleshooting.md"
+      ]
+    }
+  ]
+}
