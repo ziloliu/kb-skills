@@ -1,0 +1,23 @@
+{
+  "skill_name": "md-image-saver",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "处理当前目录下的test.md文件，图片保存到./images目录",
+      "expected_output": "test.md中的所有图片被保存到./images目录，命名格式为YYYYMMDD-test-XX.ext，test.md中的图片链接更新为相对路径，编号从00开始",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "批量处理./notes目录下的所有md文件，图片保存到./assets目录",
+      "expected_output": "notes目录下所有md文件的图片都被保存到./assets目录，每个文件的图片单独从00开始编号，命名格式为YYYYMMDD-笔记名-XX.ext，所有md文件中的链接都更新为相对路径",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "处理包含空格和特殊字符的笔记 我的笔记@2026.md，图片保存到./pics目录",
+      "expected_output": "笔记中的图片命名格式为YYYYMMDD-我的笔记-2026-XX.ext，特殊字符和空格被转换为连字符，链接更新正确",
+      "files": []
+    }
+  ]
+}
